@@ -12,7 +12,6 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true,
-    select: false
   },
   role: {
     type: String,
@@ -21,7 +20,8 @@ const userSchema = new mongoose.Schema({
   },
   supervisorId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User" 
+    ref: "User",
+    required: false
   }
 })  
 

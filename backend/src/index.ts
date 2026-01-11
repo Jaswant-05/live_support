@@ -2,6 +2,7 @@ import express, { type Request, type Response } from "express";
 import { WebSocketServer } from "ws";
 import { createServer } from "http";
 import { authenticate, authMiddleware } from "./middleware.js";
+import authRouter from "./routes/auth.js"
 
 const app = express();
 const server = createServer(app);
@@ -22,6 +23,8 @@ app.get("/health", (req: Request, res: Response) => {
   })
 });
 
+app.use("/auth", authRouter)
+
 wss.on("connection", (ws, request) => {
   ws.on("error", console.error);
   
@@ -30,11 +33,15 @@ wss.on("connection", (ws, request) => {
     ws.send("hello");
   })
 
-  //TODO: need a handler here;
+  //TODO: need a roomManager here;
 });
 
 server.on('upgrade', function upgrade(request, socket, head) {
   socket.on('error', onSocketError);
+  if (request.url !== "/ws") {
+    socket.destroy();
+    return;
+  }
 
   authenticate(request, function next(err, client) {
     if (err || !client) {
