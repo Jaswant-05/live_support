@@ -10,6 +10,7 @@ type Client = {
 
 type JwtPayload = {
   userId: string;
+  role : "admin" | "supervisor" | "agent" | "candidate";
 };
 
 export const authMiddleware = (
@@ -21,7 +22,7 @@ export const authMiddleware = (
     const auth = req.headers.authorization;
 
     if (!auth || !auth.startsWith("Bearer ")) {
-      return res.status(401).json({ success: false, message: "No token" });
+      return res.status(401).json({ success: false, message: "Unauthorized, token missing or invalid" });
     }
 
     const token = auth.split(" ")[1];
@@ -33,10 +34,11 @@ export const authMiddleware = (
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as JwtPayload;
 
     req.user_id = decoded.userId;
+    req.role = decoded.role
 
     next();
   } catch (err) {
-    return res.status(401).json({ success: false, message: "Invalid token" });
+    return res.status(401).json({ success: false, message: "Unauthorized, token missing or invalid" });
   }
 };
 
