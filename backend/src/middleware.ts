@@ -4,8 +4,9 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 
 dotenv.config();
-type Client = { 
-  userId: string
+export type Client = { 
+  userId: string,
+  role: "admin" | "supervisor" | "agent" | "candidate";
 };
 
 type JwtPayload = {
@@ -62,5 +63,5 @@ export function authenticate(
 
   // const userId = decoded.userId;
 
-  return cb(null, { userId : "123" });
+  return cb(null, { userId : "123", role : "admin" });
 }

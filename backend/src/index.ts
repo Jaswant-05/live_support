@@ -1,8 +1,9 @@
 import express, { type Request, type Response } from "express";
-import { WebSocketServer } from "ws";
-import { createServer } from "http";
-import { authenticate, authMiddleware } from "./middleware.js";
+import WebSocket, { WebSocketServer } from "ws";
+import { createServer, IncomingMessage } from "http";
+import { authenticate, authMiddleware, type Client } from "./middleware.js";
 import authRouter from "./routes/auth.js"
+import { RoomStore } from "./store/RoomStore.js";
 
 const app = express();
 const server = createServer(app);
@@ -25,12 +26,21 @@ app.get("/health", (req: Request, res: Response) => {
 
 app.use("/auth", authRouter)
 
-wss.on("connection", (ws, request) => {
+wss.on("connection", (ws: WebSocket, request: IncomingMessage, client: Client) => {
   ws.on("error", console.error);
   
+  ws.user = {
+    user_id: client.userId,
+    role: client.role 
+  }
+
+  ws.rooms = new Set();
+
   ws.on("message", function handleMessage(data){
-    console.log(data.toString());
-    ws.send("hello");
+    // console.log(data.toString());
+    // ws.send("hello");
+    const roomManager = RoomStore.getInstance();
+    roomManager.handleEvent(ws, data);
   })
 
   //TODO: need a roomManager here;
